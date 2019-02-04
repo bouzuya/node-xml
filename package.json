@@ -1,5 +1,5 @@
 {
-  "name": "node-xml",
+  "name": "@bouzuya/node-xml",
   "description": "A XML parser/formatter for Node.js",
   "version": "0.0.0",
   "author": {
