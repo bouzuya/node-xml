@@ -2,7 +2,7 @@ import { test } from 'beater';
 import assert from 'power-assert';
 import { create, createDeclaration, createElement } from '../src/builder';
 
-const category = '/xml/builder ';
+const category = '/builder ';
 const tests = [
   test(category + 'createDeclaration', () => {
     assert.deepEqual(createDeclaration('1.0'), { version: '1.0' });

@@ -2,7 +2,7 @@ import { test } from 'beater';
 import assert from 'power-assert';
 import { format } from '../src/formatter';
 
-const category = '/xml/formatter ';
+const category = '/formatter ';
 const tests = [
   test(category + 'format', () => {
     assert.deepEqual(

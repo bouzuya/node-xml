@@ -2,7 +2,7 @@ import { test } from 'beater';
 import assert from 'power-assert';
 import { parse } from '../src/parser';
 
-const category = '/xml/parser ';
+const category = '/parser ';
 const tests = [
   test(category + 'parse', async () => {
     assert.deepEqual(
