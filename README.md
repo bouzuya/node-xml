@@ -20,7 +20,7 @@ TODO
 
 [coveralls-badge-url]: https://img.shields.io/coveralls/github/bouzuya/node-xml.svg
 [coveralls-url]: https://coveralls.io/github/bouzuya/node-xml
-[npm-badge-url]: https://img.shields.io/npm/v/bouzuya/xml.svg
+[npm-badge-url]: https://img.shields.io/npm/v/@bouzuya/xml.svg
 [npm-url]: https://www.npmjs.com/package/@bouzuya/xml
 [travisci-badge-url]: https://img.shields.io/travis/bouzuya/node-xml.svg
 [travisci-url]: https://travis-ci.org/bouzuya/node-xml
