@@ -35,6 +35,28 @@ const tests = [
         '<r a="b"><c>d</c></r>'
       ].join('')
     );
+  }),
+  test(category + 'format (self-closing tag)', () => {
+    assert.deepEqual(
+      format({
+        declaration: { version: '1.0' },
+        rootElement: { attributes: {}, children: [], name: 'r' }
+      }),
+      [
+        '<?xml version="1.0"?>',
+        '<r/>'
+      ].join('')
+    );
+    assert.deepEqual(
+      format({
+        declaration: { version: '1.0' },
+        rootElement: { attributes: {}, children: [''], name: 'r' }
+      }),
+      [
+        '<?xml version="1.0"?>',
+        '<r></r>'
+      ].join('')
+    );
   })
 ];
 

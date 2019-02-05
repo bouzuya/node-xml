@@ -32,6 +32,28 @@ const tests = [
         }
       }
     );
+  }),
+  test(category + 'parse (self-closing tag)', async () => {
+    assert.deepEqual(
+      await parse([
+        '<?xml version="1.0"?>',
+        '<r/>'
+      ].join('')),
+      {
+        declaration: { version: '1.0' },
+        rootElement: { attributes: {}, children: [], name: 'r' }
+      }
+    );
+    assert.deepEqual(
+      await parse([
+        '<?xml version="1.0"?>',
+        '<r></r>'
+      ].join('')),
+      {
+        declaration: { version: '1.0' },
+        rootElement: { attributes: {}, children: [''], name: 'r' }
+      }
+    );
   })
 ];
 

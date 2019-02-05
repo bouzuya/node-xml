@@ -1,10 +1,18 @@
 import sax from 'sax';
 import { create, createDeclaration, createElement } from './builder';
-import { Declaration, Document, Element } from './type';
+import { Declaration, Document, Element, Node } from './type';
+
+const appendChild = (element: Element, child: Node): Element => {
+  return replaceChildren(element, element.children.concat([child]));
+};
+
+const replaceChildren = (element: Element, children: Node[]): Element => {
+  return createElement(element.name, element.attributes, children);
+};
 
 const parse = (s: string): Promise<Document> => {
   return new Promise((resolvePromise, reject) => {
-    const stack: Element[] = [];
+    const stack: Array<{ element: Element; isSelfClosing: boolean; }> = [];
     let cdataBuffer: string | null = null;
     let declaration: Declaration | null = null;
     let rootElement: Element | null = null;
@@ -22,24 +30,32 @@ const parse = (s: string): Promise<Document> => {
     };
     parser.onclosecdata = (): void => {
       if (cdataBuffer === null) return; // ignore empty cdata
-      const element = stack.pop();
-      if (typeof element === 'undefined') return; // ignore
-      const { attributes, children, name } = element;
-      const newElement = createElement(name, attributes, children.concat([cdataBuffer]));
-      stack.push(newElement);
+      const item = stack.pop();
+      if (typeof item === 'undefined') return; // ignore
+      const { element, isSelfClosing } = item;
+      const newElement = appendChild(element, cdataBuffer);
+      stack.push({ element: newElement, isSelfClosing });
       cdataBuffer = null;
     };
     parser.onclosetag = (tagName: string): void => {
-      const element = stack.pop();
-      if (typeof element === 'undefined' || element.name !== tagName)
+      const item = stack.pop();
+      if (typeof item === 'undefined' || item.element.name !== tagName)
         return reject(new Error('assertion error'));
-      const parentElement = stack.pop();
-      if (typeof parentElement === 'undefined')
-        rootElement = element;
+      const newElement = item.isSelfClosing || item.element.children.length > 0
+        ? item.element
+        : replaceChildren(item.element, ['']);
+      const parentItem = stack.pop();
+      if (typeof parentItem === 'undefined')
+        rootElement = newElement;
       else {
-        const { attributes, children, name } = parentElement;
-        const newParentElement = createElement(name, attributes, children.concat([element]));
-        stack.push(newParentElement);
+        const {
+          element: parentElement,
+          isSelfClosing: parentIsSelfClosing
+        } = parentItem;
+        stack.push({
+          element: appendChild(parentElement, newElement),
+          isSelfClosing: parentIsSelfClosing
+        });
       }
     };
     parser.onend = (): void => {
@@ -51,7 +67,7 @@ const parse = (s: string): Promise<Document> => {
     // parser.onopencdata = (): void => {};
     parser.onopentag = (tag: sax.Tag): void => {
       const newElement = createElement(tag.name, tag.attributes, []);
-      stack.push(newElement);
+      stack.push({ element: newElement, isSelfClosing: tag.isSelfClosing });
     };
     parser.onprocessinginstruction = (node: { name: string; body: string }) => {
       if (node.name !== 'xml') return reject(new Error('not xml'));
@@ -67,11 +83,11 @@ const parse = (s: string): Promise<Document> => {
       declaration = createDeclaration(version, encoding, standalone);
     };
     parser.ontext = (text: string): void => {
-      const element = stack.pop();
-      if (typeof element === 'undefined') return; // ignore
-      const { attributes, children, name } = element;
-      const newElement = createElement(name, attributes, children.concat([text]));
-      stack.push(newElement);
+      const item = stack.pop();
+      if (typeof item === 'undefined') return; // ignore
+      const { element, isSelfClosing } = item;
+      const newElement = appendChild(element, text);
+      stack.push({ element: newElement, isSelfClosing });
     };
 
     parser.write(s).close();
